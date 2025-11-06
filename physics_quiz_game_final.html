@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Position, Distance & Displacement Quiz Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 3px solid #e9ecef;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            transition: width 0.5s ease;
+        }
+
+        .question-container {
+            padding: 40px;
+            min-height: 400px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            padding: 20px;
+            background: #f8f9fa;
+            border: 3px solid #dee2e6;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            color: #495057;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+            border-color: #adb5bd;
+        }
+
+        .option.selected {
+            background: #cfe2ff;
+            border-color: #0d6efd;
+        }
+
+        .option.correct {
+            background: #d1e7dd;
+            border-color: #0f5132;
+            animation: correctPulse 0.6s ease;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #842029;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-align: center;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d1e7dd;
+            color: #0f5132;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #842029;
+            display: block;
+        }
+
+        .next-button {
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: none;
+            width: 100%;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .next-button:hover {
+            transform: scale(1.05);
+        }
+
+        .start-screen, .end-screen {
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .start-screen h2, .end-screen h2 {
+            font-size: 2em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .start-screen p, .end-screen p {
+            font-size: 1.2em;
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+
+        .start-button, .restart-button {
+            padding: 15px 50px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .start-button:hover, .restart-button:hover {
+            transform: scale(1.05);
+        }
+
+        .final-score {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .performance {
+            font-size: 1.3em;
+            color: #495057;
+            margin: 10px 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .emoji {
+            font-size: 4em;
+            margin: 20px 0;
+        }
+
+        /* Bonus Ready Screen */
+        .bonus-ready-screen {
+            padding: 60px 40px;
+            text-align: center;
+            background: linear-gradient(180deg, #a8e6ff 0%, #ffffff 100%);
+        }
+
+        .bonus-ready-screen h2 {
+            font-size: 2.5em;
+            color: #0099ff;
+            margin-bottom: 20px;
+        }
+
+        .bonus-ready-screen .emoji {
+            font-size: 5em;
+        }
+
+        .bonus-instructions {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        .bonus-instructions h3 {
+            color: #0099ff;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .bonus-instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .bonus-instructions li {
+            padding: 10px 0;
+            font-size: 1.2em;
+            color: #495057;
+        }
+
+        .bonus-instructions li strong {
+            color: #0099ff;
+        }
+
+        .ready-button {
+            padding: 20px 60px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .ready-button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Snowball Bonus Level Styles */
+        .bonus-screen {
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(180deg, #a8e6ff 0%, #ffffff 100%);
+            min-height: 600px;
+            position: relative;
+        }
+
+        .bonus-header {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bonus-header h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .bonus-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .bonus-stat {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .bonus-stat-label {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .bonus-stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #0099ff;
+        }
+
+        #snowballCanvas {
+            border: 4px solid #0099ff;
+            border-radius: 15px;
+            background: linear-gradient(180deg, #e6f7ff 0%, #ffffff 100%);
+            cursor: crosshair;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            max-width: 100%;
+        }
+
+        .game-instructions {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .game-instructions p {
+            margin: 5px 0;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🎯 Position, Distance & Displacement Quiz</h1>
+            <p>Test Your Physics Knowledge!</p>
+        </div>
+
+        <!-- Start Screen -->
+        <div class="start-screen" id="startScreen">
+            <div class="emoji">🚀</div>
+            <h2>Ready to Test Your Knowledge?</h2>
+            <p>Answer questions on Position, Distance, and Displacement</p>
+            <p><strong>Goal: Get 20 questions correct!</strong></p>
+            <p style="color: #0099ff; font-weight: bold;">⛄ Bonus: Every 4 correct answers unlocks a Snowball Battle!</p>
+            <button class="start-button" onclick="startGame()">Start Game</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div class="game-screen hidden" id="gameScreen">
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label">Correct Answers</div>
+                    <div class="score-value" id="questionNumber">0/20</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Score</div>
+                    <div class="score-value" id="score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Streak</div>
+                    <div class="score-value" id="streak">0</div>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+
+            <div class="question-container">
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+                <div class="feedback" id="feedback"></div>
+                <button class="next-button" id="nextButton" onclick="nextQuestion()">Next Question →</button>
+            </div>
+        </div>
+
+        <!-- Bonus Ready Screen -->
+        <div class="bonus-ready-screen hidden" id="bonusReadyScreen">
+            <div class="emoji">🎉</div>
+            <h2>BONUS ROUND UNLOCKED!</h2>
+            <p style="font-size: 1.3em; color: #0099ff; font-weight: bold;">You got 4 correct in a row! Time for some fun!</p>
+            
+            <div class="bonus-instructions">
+                <h3>⛄ Snowball Battle Instructions:</h3>
+                <ul>
+                    <li>🎯 <strong>CLICK</strong> to throw snowballs at the red targets</li>
+                    <li>🏆 <strong>30 points</strong> for each target you hit!</li>
+                    <li>🖱️ <strong>MOVE YOUR MOUSE</strong> to dodge incoming enemy snowballs</li>
+                    <li>❤️ You have <strong>3 lives</strong> - don't get hit 3 times!</li>
+                    <li>⏱️ You have <strong>30 seconds</strong> to score as many points as possible</li>
+                </ul>
+            </div>
+            
+            <button class="ready-button" onclick="startBonusGame()">I'M READY! START BONUS ROUND →</button>
+        </div>
+
+        <!-- Bonus Screen -->
+        <div class="bonus-screen hidden" id="bonusScreen">
+            <div class="bonus-header">
+                <h2>⛄ SNOWBALL BONUS ROUND! ❄️</h2>
+                <p>Earn extra points by hitting targets and dodging snowballs!</p>
+            </div>
+
+            <div class="game-instructions">
+                <p>🎯 <strong>Click to throw snowballs</strong> at the moving targets (30 points each)</p>
+                <p>⚠️ <strong>Move your mouse</strong> to dodge incoming enemy snowballs</p>
+                <p>❤️ You have <strong>3 lives</strong> - Don't get hit 3 times!</p>
+            </div>
+
+            <div class="bonus-stats">
+                <div class="bonus-stat">
+                    <div class="bonus-stat-label">Time Left</div>
+                    <div class="bonus-stat-value" id="bonusTime">30</div>
+                </div>
+                <div class="bonus-stat">
+                    <div class="bonus-stat-label">Hits</div>
+                    <div class="bonus-stat-value" id="bonusHits">0</div>
+                </div>
+                <div class="bonus-stat">
+                    <div class="bonus-stat-label">Lives</div>
+                    <div class="bonus-stat-value" id="bonusLives">❤️❤️❤️</div>
+                </div>
+                <div class="bonus-stat">
+                    <div class="bonus-stat-label">Bonus Points</div>
+                    <div class="bonus-stat-value" id="bonusPoints">0</div>
+                </div>
+            </div>
+
+            <canvas id="snowballCanvas" width="700" height="400"></canvas>
+            
+            <button class="next-button" id="bonusComplete" onclick="returnToQuiz()">Continue to Next Question →</button>
+        </div>
+
+        <!-- End Screen -->
+        <div class="end-screen hidden" id="endScreen">
+            <div class="emoji" id="endEmoji">🎉</div>
+            <h2>Quiz Complete!</h2>
+            <div class="final-score" id="finalScore">0/50</div>
+            <div class="performance" id="performance"></div>
+            <p id="percentageScore"></p>
+            <p id="bonusEarned" style="color: #0099ff; font-weight: bold; font-size: 1.2em; margin-top: 10px;"></p>
+            <button class="restart-button" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state variables
+        let currentQuestion = 0;
+        let score = 0;
+        let correctAnswers = 0;
+        let consecutiveCorrect = 0;
+        let totalBonusPoints = 0;
+        let selectedAnswer = null;
+        const GOAL_CORRECT = 20;
+        const BONUS_TRIGGER = 4;
+
+        // Bonus game variables
+        let canvas, ctx;
+        let player = null;
+        let targets = [];
+        let enemySnowballs = [];
+        let playerSnowballs = [];
+        let bonusTimer = null;
+        let enemySpawner = null;
+        let bonusTimeLeft = 30;
+        let bonusHits = 0;
+        let bonusLives = 3;
+        let bonusActive = false;
+        let animationFrame = null;
+
+        const allQuestions = [
+            {q: "What is the main difference between distance and displacement?", o: ["Distance is always larger than displacement", "Distance is a scalar quantity while displacement is a vector quantity", "Distance can be negative while displacement cannot", "Distance requires a reference point while displacement does not"], c: 1},
+            {q: "A student walks 4 blocks east, then 3 blocks north, then 4 blocks west. What is the student's total distance traveled?", o: ["1 block", "3 blocks", "7 blocks", "11 blocks"], c: 3},
+            {q: "A student walks 4 blocks east, then 3 blocks north, then 4 blocks west. What is the magnitude of the student's displacement?", o: ["0 blocks", "3 blocks", "7 blocks", "11 blocks"], c: 1},
+            {q: "In stockcar races, drivers often travel 500 miles but end up only a few feet from where they started. This demonstrates that:", o: ["Displacement can be much smaller than distance traveled", "Distance is always equal to displacement", "Racing involves no actual motion", "The cars are moving in a straight line"], c: 0},
+            {q: "A frame of reference is best defined as:", o: ["A picture showing an object's motion", "A fixed point from which position is measured", "The speed at which an object moves", "The path an object follows"], c: 1},
+            {q: "If you walk around a complete circular track and return to your starting point, your displacement is:", o: ["Equal to the circumference of the track", "Equal to the diameter of the track", "Zero", "Impossible to determine"], c: 2},
+            {q: "Which of the following requires both magnitude and direction to be fully described?", o: ["Distance only", "Displacement only", "Both distance and displacement", "Neither distance nor displacement"], c: 1},
+            {q: "A person walks 5 meters east, then 5 meters west. What is their final displacement relative to their starting position?", o: ["10 meters east", "10 meters", "5 meters east", "0 meters"], c: 3},
+            {q: "Position is best defined as:", o: ["The distance an object travels", "The speed of an object", "The location of an object in a frame of reference", "The time an object has been moving"], c: 2},
+            {q: "The exact position of an object is:", o: ["Always measured from the center of Earth", "The separation between the object and the reference point", "The same as the object's displacement", "Independent of any reference point"], c: 1},
+            {q: "John lives on a square block that is 180 yards per side. If he walks once around the block, what distance does he travel?", o: ["180 yards", "360 yards", "720 yards", "0 yards"], c: 2},
+            {q: "John lives on a square block that is 180 yards per side. What is John's final displacement after walking once around the block?", o: ["0 yards", "180 yards", "360 yards", "720 yards"], c: 0},
+            {q: "It is common to choose the original position of an object to be:", o: ["At the center of a coordinate system", "On the zero mark", "At the destination", "At the highest point"], c: 1},
+            {q: "Distance does NOT need which of the following?", o: ["A starting point", "A measurement unit", "A direction", "A path traveled"], c: 2},
+            {q: "A hiker walks 12 km from camp. To find the hiker's displacement from camp, what additional information is necessary?", o: ["The time taken", "The hiker's speed", "The direction(s) of travel", "The terrain difficulty"], c: 2},
+            {q: "Joanna's house is 8000 feet due west of her school. If her house is assigned position zero and school is +8000, what is Joanna's position if she walks 100 feet west of her house?", o: ["-100 feet", "+100 feet", "+7900 feet", "+8100 feet"], c: 0},
+            {q: "On a number line for straight-line motion, positions can be:", o: ["Only positive numbers", "Only negative numbers", "Either positive or negative numbers", "Only at the zero mark"], c: 2},
+            {q: "The change in position of an object is called its:", o: ["Distance", "Velocity", "Displacement", "Speed"], c: 2},
+            {q: "Displacement is a vector quantity, which means:", o: ["It only has magnitude", "It has both magnitude and direction", "It is always positive", "It cannot be zero"], c: 1},
+            {q: "A delivery driver makes stops at three locations. She drives 15 miles north, then 8 miles east, then 15 miles south. What is the total distance traveled?", o: ["8 miles", "23 miles", "38 miles", "46 miles"], c: 2},
+            {q: "A delivery driver makes stops at three locations. She drives 15 miles north, then 8 miles east, then 15 miles south. What is the magnitude of displacement?", o: ["8 miles", "23 miles", "38 miles", "46 miles"], c: 0},
+            {q: "When the displacement is zero, the distance traveled:", o: ["May or may not be zero", "Must also be zero", "Must be negative", "Is impossible to determine"], c: 0},
+            {q: "Which of the following trips would result in zero displacement?", o: ["Walking 5 blocks north", "Driving from home to school", "Running one complete lap around a track", "Riding an elevator up 3 floors"], c: 2},
+            {q: "A swimmer crosses a 50-meter pool, then swims back halfway. What is the swimmer's displacement from the starting point?", o: ["50 meters", "75 meters", "25 meters toward the far side", "25 meters toward the starting side"], c: 2},
+            {q: "A robot vacuum cleaner travels a total of 85 meters while cleaning a room, but ends up only 3 meters from where it started. This is possible because:", o: ["The measurements are incorrect", "The robot traveled a winding path", "Displacement must equal distance", "The robot moved backwards the entire time"], c: 1},
+            {q: "A taxi picks up a passenger and drives 2 km north, 3 km east, 2 km south, and 1 km west. What is the total distance driven?", o: ["2 km", "4 km", "8 km", "6 km"], c: 2},
+            {q: "A taxi picks up a passenger and drives 2 km north, 3 km east, 2 km south, and 1 km west. What is the magnitude of the taxi's displacement?", o: ["8 km", "2 km", "4 km", "0 km"], c: 1},
+            {q: "A quarterback is sacked for a loss of 8 yards from the line of scrimmage. If the line of scrimmage is the reference point (position = 0), what is the quarterback's final position?", o: ["-8 yards", "+8 yards", "0 yards", "Cannot be determined"], c: 0},
+            {q: "A football player runs 60 yards downfield for a touchdown, then the play is called back. He returns to the line of scrimmage. His total distance traveled is:", o: ["0 yards", "60 yards", "120 yards", "Cannot be determined"], c: 2},
+            {q: "A football player runs 60 yards downfield for a touchdown, then the play is called back. He returns to the line of scrimmage. His displacement is:", o: ["0 yards", "60 yards", "120 yards", "-60 yards"], c: 0},
+            {q: "An ant crawls along the edges of a rectangular garden that is 5 meters by 3 meters, starting at one corner and ending at the diagonally opposite corner. What is the ant's total distance if it travels along two edges?", o: ["2 meters", "8 meters", "15 meters", "5.83 meters"], c: 1},
+            {q: "An ant crawls along the edges of a rectangular garden that is 5 meters by 3 meters, starting at one corner and ending at the diagonally opposite corner. What is the magnitude of the ant's displacement?", o: ["8 meters", "5.83 meters", "15 meters", "4 meters"], c: 1},
+            {q: "A bird flies 100 meters north, then 100 meters at an angle, ending up 150 meters north of its starting point. The bird's total distance traveled is:", o: ["150 meters", "200 meters", "250 meters", "Cannot be determined from given information"], c: 1},
+            {q: "Two students walk the same distance from the library. Can they have different displacements?", o: ["Yes, if they walk in different directions", "No, same distance always means same displacement", "Only if they walk at different speeds", "Only if they take different amounts of time"], c: 0},
+            {q: "A boat sails across a lake and returns to its dock. Which statement must be true?", o: ["Distance equals displacement", "Displacement is zero", "Distance is zero", "The boat never moved"], c: 1},
+            {q: "On a straight highway, a car's odometer reads 45,280 km at the start and 45,350 km at the end of a trip. The distance traveled is:", o: ["45,350 km", "45,280 km", "70 km", "Cannot be determined"], c: 2},
+            {q: "On a straight highway, a car's odometer reads 45,280 km at the start and 45,350 km at the end of a trip. The displacement could be:", o: ["Exactly 70 km", "Exactly 0 km", "Any value from 0 to 70 km depending on direction changes", "Must be greater than 70 km"], c: 2},
+            {q: "A student walks from point A to point B along a straight path, taking 3 different routes. Which quantity must be the same for all three routes?", o: ["Distance traveled", "Displacement", "Time taken", "Average speed"], c: 1},
+            {q: "A tennis ball is hit back and forth across a net 25 times. If the net is 12 meters from each baseline, what is the minimum total distance the ball traveled?", o: ["12 meters", "300 meters", "600 meters", "0 meters"], c: 2},
+            {q: "A tennis ball is hit back and forth across a net 25 times. If the net is 12 meters from each baseline, if the ball ends on the same side where it started, the displacement is:", o: ["0 meters", "12 meters", "300 meters", "600 meters"], c: 0},
+            {q: "An elevator in a 20-story building travels from the ground floor to the 15th floor, then to the 8th floor, then to the 12th floor. Using the ground floor as the reference point, what is the elevator's final position?", o: ["8th floor", "12th floor", "35 floors", "15th floor"], c: 1},
+            {q: "Which scenario represents the greatest displacement?", o: ["Walking 100 m north, then 100 m south", "Walking 100 m north, then 50 m south", "Walking in a circle with radius 100 m", "All have the same displacement"], c: 1},
+            {q: "A chess piece moves three squares forward and two squares to the right. Another identical piece moves two squares to the right and three squares forward. Which statement is true?", o: ["Both pieces have the same displacement", "The first piece has greater displacement", "The second piece has greater displacement", "Neither piece has any displacement"], c: 0},
+            {q: "In a football game, a running back gains 8 yards, loses 3 yards, gains 12 yards, and loses 2 yards. What is his total displacement?", o: ["25 yards", "23 yards", "15 yards", "5 yards"], c: 2},
+            {q: "In a football game, a running back gains 8 yards, loses 3 yards, gains 12 yards, and loses 2 yards. What is his total distance run?", o: ["25 yards", "23 yards", "15 yards", "5 yards"], c: 0},
+            {q: "A marble rolls 45 cm east across a table, then rolls 45 cm west. Which statement is correct?", o: ["Distance is 90 cm, displacement is 0 cm", "Distance is 0 cm, displacement is 90 cm", "Both distance and displacement are 90 cm", "Both distance and displacement are 0 cm"], c: 0},
+            {q: "A drone flies a search pattern covering 8.5 km total distance. If it ends up 2.1 km from its starting point, what can you conclude?", o: ["The drone did not fly in a straight line", "The measurements are incorrect", "The drone must have flown in a straight line", "The displacement should equal 8.5 km"], c: 0},
+            {q: "On a hiking trail, you walk 2.5 km northeast. What is your displacement from the starting point?", o: ["0 km", "Greater than 2.5 km", "2.5 km northeast", "Cannot be determined"], c: 2},
+            {q: "A race car completes 2.5 laps on a circular track. If one lap is 4 km, what is the car's displacement if it ends halfway around from where it started?", o: ["10 km", "8 km", "Equal to the diameter of the track", "0 km"], c: 2},
+            {q: "Two ants start at the same point. Ant A travels 8 cm north. Ant B travels 6 cm east. How much farther apart are they than if they both stayed at the starting point?", o: ["2 cm", "14 cm", "10 cm", "48 cm"], c: 2}
+        ];
+
+        // Shuffle array function
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = [];
+        let questionIndex = 0;
+
+        function startGame() {
+            try {
+                // Shuffle questions at start
+                questions = shuffleArray(allQuestions);
+                questionIndex = 0;
+                correctAnswers = 0;
+                consecutiveCorrect = 0;
+                score = 0;
+                totalBonusPoints = 0;
+                
+                document.getElementById('startScreen').classList.add('hidden');
+                document.getElementById('gameScreen').classList.remove('hidden');
+                loadQuestion();
+            } catch(e) {
+                console.error('Error starting game:', e);
+                alert('Error starting game. Please refresh the page.');
+            }
+        }
+
+        function loadQuestion() {
+            try {
+                // Check if we've reached 20 correct answers
+                if (correctAnswers >= GOAL_CORRECT) {
+                    showResults();
+                    return;
+                }
+                
+                // Check if we need more questions
+                if (questionIndex >= questions.length) {
+                    // Re-shuffle and continue
+                    questions = shuffleArray(allQuestions);
+                    questionIndex = 0;
+                }
+
+                const question = questions[questionIndex];
+                document.getElementById('questionNumber').textContent = `${correctAnswers}/${GOAL_CORRECT}`;
+                document.getElementById('questionText').textContent = question.q;
+                document.getElementById('streak').textContent = consecutiveCorrect;
+                
+                const optionsContainer = document.getElementById('options');
+                optionsContainer.innerHTML = '';
+                
+                question.o.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.textContent = option;
+                    optionDiv.onclick = () => selectAnswer(index);
+                    optionsContainer.appendChild(optionDiv);
+                });
+                
+                document.getElementById('feedback').className = 'feedback';
+                document.getElementById('nextButton').style.display = 'none';
+                selectedAnswer = null;
+                
+                updateProgressBar();
+            } catch(e) {
+                console.error('Error loading question:', e);
+            }
+        }
+
+        function selectAnswer(index) {
+            if (selectedAnswer !== null) return;
+            
+            try {
+                selectedAnswer = index;
+                const question = questions[questionIndex];
+                const options = document.querySelectorAll('.option');
+                const feedback = document.getElementById('feedback');
+                
+                options[index].classList.add('selected');
+                
+                setTimeout(() => {
+                    if (index === question.c) {
+                        options[index].classList.add('correct');
+                        feedback.className = 'feedback correct';
+                        feedback.textContent = '✓ Correct! Well done!';
+                        score += 10;
+                        correctAnswers++;
+                        consecutiveCorrect++;
+                    } else {
+                        options[index].classList.add('incorrect');
+                        options[question.c].classList.add('correct');
+                        feedback.className = 'feedback incorrect';
+                        feedback.textContent = '✗ Incorrect. The correct answer is highlighted.';
+                        consecutiveCorrect = 0;
+                    }
+                    
+                    document.getElementById('score').textContent = score;
+                    document.getElementById('questionNumber').textContent = `${correctAnswers}/${GOAL_CORRECT}`;
+                    document.getElementById('streak').textContent = consecutiveCorrect;
+                    document.getElementById('nextButton').style.display = 'block';
+                }, 300);
+            } catch(e) {
+                console.error('Error selecting answer:', e);
+            }
+        }
+
+        function nextQuestion() {
+            try {
+                // Check if bonus round should trigger (every 4 correct)
+                if (consecutiveCorrect === BONUS_TRIGGER) {
+                    showBonusReady();
+                    return;
+                }
+                
+                // Move to next question
+                questionIndex++;
+                
+                // Check if we've reached 20 correct
+                if (correctAnswers >= GOAL_CORRECT) {
+                    showResults();
+                } else {
+                    loadQuestion();
+                }
+            } catch(e) {
+                console.error('Error going to next question:', e);
+            }
+        }
+
+        function showBonusReady() {
+            try {
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('bonusReadyScreen').classList.remove('hidden');
+            } catch(e) {
+                console.error('Error showing bonus ready screen:', e);
+            }
+        }
+
+        function startBonusGame() {
+            try {
+                consecutiveCorrect = 0; // Reset streak
+                document.getElementById('bonusReadyScreen').classList.add('hidden');
+                startBonusRound();
+            } catch(e) {
+                console.error('Error starting bonus game:', e);
+            }
+        }
+
+        function updateProgressBar() {
+            try {
+                const progress = (correctAnswers / GOAL_CORRECT) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+            } catch(e) {
+                console.error('Error updating progress:', e);
+            }
+        }
+
+        function startBonusRound() {
+            try {
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('bonusScreen').classList.remove('hidden');
+                document.getElementById('bonusComplete').style.display = 'none';
+                
+                // Initialize bonus game
+                canvas = document.getElementById('snowballCanvas');
+                ctx = canvas.getContext('2d');
+                
+                bonusTimeLeft = 30;
+                bonusHits = 0;
+                bonusLives = 3;
+                bonusActive = true;
+                
+                // Initialize player
+                player = {
+                    x: canvas.width / 2,
+                    y: canvas.height - 30,
+                    radius: 15
+                };
+                
+                // Reset arrays
+                targets = [];
+                enemySnowballs = [];
+                playerSnowballs = [];
+                
+                // Create initial targets
+                for (let i = 0; i < 3; i++) {
+                    createTarget();
+                }
+                
+                // Update displays
+                updateBonusDisplay();
+                
+                // Add event listeners
+                canvas.addEventListener('mousemove', handleMouseMove);
+                canvas.addEventListener('click', throwSnowball);
+                
+                // Start game loop
+                gameLoop();
+                
+                // Start timer
+                bonusTimer = setInterval(() => {
+                    bonusTimeLeft--;
+                    updateBonusDisplay();
+                    
+                    if (bonusTimeLeft <= 0 || bonusLives <= 0) {
+                        endBonusRound();
+                    }
+                }, 1000);
+                
+                // Spawn enemy snowballs periodically
+                enemySpawner = setInterval(() => {
+                    if (bonusActive) {
+                        createEnemySnowball();
+                    }
+                }, 1500);
+            } catch(e) {
+                console.error('Error starting bonus round:', e);
+                returnToQuiz();
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (!player || !canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            player.x = e.clientX - rect.left;
+            player.y = e.clientY - rect.top;
+        }
+
+        function throwSnowball(e) {
+            if (!bonusActive || !player || !canvas) return;
+            
+            try {
+                const rect = canvas.getBoundingClientRect();
+                const targetX = e.clientX - rect.left;
+                const targetY = e.clientY - rect.top;
+                
+                const angle = Math.atan2(targetY - player.y, targetX - player.x);
+                
+                playerSnowballs.push({
+                    x: player.x,
+                    y: player.y,
+                    vx: Math.cos(angle) * 8,
+                    vy: Math.sin(angle) * 8,
+                    radius: 8
+                });
+            } catch(e) {
+                console.error('Error throwing snowball:', e);
+            }
+        }
+
+        function createTarget() {
+            if (!canvas) return;
+            targets.push({
+                x: Math.random() * (canvas.width - 60) + 30,
+                y: Math.random() * (canvas.height - 200) + 30,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                radius: 20
+            });
+        }
+
+        function createEnemySnowball() {
+            if (!canvas) return;
+            const side = Math.floor(Math.random() * 4);
+            let x, y, vx, vy;
+            
+            switch(side) {
+                case 0: // Top
+                    x = Math.random() * canvas.width;
+                    y = -10;
+                    vx = (Math.random() - 0.5) * 4;
+                    vy = 3 + Math.random() * 2;
+                    break;
+                case 1: // Right
+                    x = canvas.width + 10;
+                    y = Math.random() * canvas.height;
+                    vx = -(3 + Math.random() * 2);
+                    vy = (Math.random() - 0.5) * 4;
+                    break;
+                case 2: // Bottom
+                    x = Math.random() * canvas.width;
+                    y = canvas.height + 10;
+                    vx = (Math.random() - 0.5) * 4;
+                    vy = -(3 + Math.random() * 2);
+                    break;
+                case 3: // Left
+                    x = -10;
+                    y = Math.random() * canvas.height;
+                    vx = 3 + Math.random() * 2;
+                    vy = (Math.random() - 0.5) * 4;
+                    break;
+            }
+            
+            enemySnowballs.push({ x, y, vx, vy, radius: 10 });
+        }
+
+        function gameLoop() {
+            if (!bonusActive || !canvas || !ctx || !player) return;
+            
+            try {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Update and draw targets
+                for (let i = targets.length - 1; i >= 0; i--) {
+                    const target = targets[i];
+                    target.x += target.vx;
+                    target.y += target.vy;
+                    
+                    // Bounce off walls
+                    if (target.x < target.radius || target.x > canvas.width - target.radius) {
+                        target.vx *= -1;
+                    }
+                    if (target.y < target.radius || target.y > canvas.height - target.radius) {
+                        target.vy *= -1;
+                    }
+                    
+                    // Draw target
+                    ctx.beginPath();
+                    ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    
+                    // Draw target symbol
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🎯', target.x, target.y);
+                }
+                
+                // Update and draw player snowballs
+                for (let i = playerSnowballs.length - 1; i >= 0; i--) {
+                    const snowball = playerSnowballs[i];
+                    snowball.x += snowball.vx;
+                    snowball.y += snowball.vy;
+                    
+                    // Remove if out of bounds
+                    if (snowball.x < 0 || snowball.x > canvas.width || 
+                        snowball.y < 0 || snowball.y > canvas.height) {
+                        playerSnowballs.splice(i, 1);
+                        continue;
+                    }
+                    
+                    // Check collision with targets
+                    let hitTarget = false;
+                    for (let j = targets.length - 1; j >= 0; j--) {
+                        const target = targets[j];
+                        const dx = snowball.x - target.x;
+                        const dy = snowball.y - target.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < snowball.radius + target.radius) {
+                            playerSnowballs.splice(i, 1);
+                            targets.splice(j, 1);
+                            bonusHits++;
+                            score += 30;
+                            document.getElementById('score').textContent = score;
+                            createTarget();
+                            updateBonusDisplay();
+                            hitTarget = true;
+                            break;
+                        }
+                    }
+                    
+                    if (hitTarget) continue;
+                    
+                    // Draw snowball
+                    ctx.beginPath();
+                    ctx.arc(snowball.x, snowball.y, snowball.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                    ctx.strokeStyle = '#0099ff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+                
+                // Update and draw enemy snowballs
+                for (let i = enemySnowballs.length - 1; i >= 0; i--) {
+                    const snowball = enemySnowballs[i];
+                    snowball.x += snowball.vx;
+                    snowball.y += snowball.vy;
+                    
+                    // Remove if out of bounds
+                    if (snowball.x < -50 || snowball.x > canvas.width + 50 || 
+                        snowball.y < -50 || snowball.y > canvas.height + 50) {
+                        enemySnowballs.splice(i, 1);
+                        continue;
+                    }
+                    
+                    // Check collision with player
+                    const dx = snowball.x - player.x;
+                    const dy = snowball.y - player.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < snowball.radius + player.radius) {
+                        enemySnowballs.splice(i, 1);
+                        bonusLives--;
+                        updateBonusDisplay();
+                        
+                        // Flash effect
+                        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        if (bonusLives <= 0) {
+                            endBonusRound();
+                        }
+                        continue;
+                    }
+                    
+                    // Draw enemy snowball
+                    ctx.beginPath();
+                    ctx.arc(snowball.x, snowball.y, snowball.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ff4444';
+                    ctx.fill();
+                    ctx.strokeStyle = '#aa0000';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+                
+                // Draw player
+                if (player) {
+                    ctx.beginPath();
+                    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = '#0099ff';
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    
+                    // Draw player emoji
+                    ctx.font = 'bold 20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('⛄', player.x, player.y);
+                }
+                
+                animationFrame = requestAnimationFrame(gameLoop);
+            } catch(e) {
+                console.error('Error in game loop:', e);
+                endBonusRound();
+            }
+        }
+
+        function updateBonusDisplay() {
+            try {
+                document.getElementById('bonusTime').textContent = bonusTimeLeft;
+                document.getElementById('bonusHits').textContent = bonusHits;
+                document.getElementById('bonusLives').textContent = '❤️'.repeat(Math.max(0, bonusLives));
+                document.getElementById('bonusPoints').textContent = bonusHits * 30;
+            } catch(e) {
+                console.error('Error updating bonus display:', e);
+            }
+        }
+
+        function endBonusRound() {
+            try {
+                bonusActive = false;
+                if (bonusTimer) clearInterval(bonusTimer);
+                if (enemySpawner) clearInterval(enemySpawner);
+                if (animationFrame) cancelAnimationFrame(animationFrame);
+                
+                if (canvas) {
+                    canvas.removeEventListener('mousemove', handleMouseMove);
+                    canvas.removeEventListener('click', throwSnowball);
+                }
+                
+                totalBonusPoints += bonusHits * 30;
+                
+                // Show completion message
+                document.getElementById('bonusComplete').style.display = 'block';
+                
+                // Add summary to canvas
+                if (ctx && canvas) {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 40px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Bonus Round Complete!', canvas.width / 2, canvas.height / 2 - 40);
+                    
+                    ctx.font = 'bold 30px Arial';
+                    ctx.fillStyle = '#4ade80';
+                    ctx.fillText(`You earned ${bonusHits * 30} bonus points!`, canvas.width / 2, canvas.height / 2 + 20);
+                    
+                    ctx.font = '24px Arial';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText(`Targets Hit: ${bonusHits}`, canvas.width / 2, canvas.height / 2 + 60);
+                }
+            } catch(e) {
+                console.error('Error ending bonus round:', e);
+                returnToQuiz();
+            }
+        }
+
+        function returnToQuiz() {
+            try {
+                document.getElementById('bonusScreen').classList.add('hidden');
+                document.getElementById('gameScreen').classList.remove('hidden');
+                
+                questionIndex++;
+                
+                if (correctAnswers >= GOAL_CORRECT) {
+                    showResults();
+                } else {
+                    loadQuestion();
+                }
+            } catch(e) {
+                console.error('Error returning to quiz:', e);
+            }
+        }
+
+        function showResults() {
+            try {
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('endScreen').classList.remove('hidden');
+                
+                document.getElementById('finalScore').textContent = `${correctAnswers}/${GOAL_CORRECT}`;
+                document.getElementById('percentageScore').textContent = `Total Score: ${score} points`;
+                document.getElementById('bonusEarned').textContent = `⛄ Bonus Points Earned: ${totalBonusPoints}`;
+                
+                let performance, emoji;
+                emoji = '🏆';
+                performance = '🌟 Congratulations! You completed the quiz!';
+                
+                document.getElementById('performance').textContent = performance;
+                document.getElementById('endEmoji').textContent = emoji;
+            } catch(e) {
+                console.error('Error showing results:', e);
+            }
+        }
+
+        function restartGame() {
+            try {
+                questionIndex = 0;
+                score = 0;
+                correctAnswers = 0;
+                consecutiveCorrect = 0;
+                totalBonusPoints = 0;
+                selectedAnswer = null;
+                
+                document.getElementById('endScreen').classList.add('hidden');
+                document.getElementById('startScreen').classList.remove('hidden');
+            } catch(e) {
+                console.error('Error restarting game:', e);
+                location.reload();
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            console.log('Game loaded successfully!');
+        });
+    </script>
+</body>
+</html>
